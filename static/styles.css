@@ -1,0 +1,63 @@
+body {
+    font-size: 16px;
+  }
+/*   
+@media (max-width: 768px) {
+    body {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    body {
+        font-size: 12px;
+    }
+}
+
+
+@media only screen and (max-device-width: 480px) {
+    body {
+      font-size: 14px;
+    }
+  }
+  
+  @media only screen and (max-device-width: 320px) {
+    body {
+      font-size: 12px;
+    }
+  }
+
+
+@media only screen and (max-device-width: 480px) and (-webkit-min-device-pixel-ratio: 2) {
+    body {
+      font-size: 20px;
+    }
+  }
+  
+  @media only screen and (max-device-width: 480px) and (-webkit-max-device-pixel-ratio: 1) {
+    body {
+      font-size: 14px;
+    }
+  }
+  
+  @media only screen and (max-device-width: 320px) and (-webkit-max-device-pixel-ratio: 1) {
+    body {
+      font-size: 12px;
+    }
+  } */
+/* 
+  /* Styles for small screens */
+@media (max-width: 767px) {
+  button {
+    font-size: 1.5em;
+    padding: 0.5em 1em;
+  }
+}
+
+/* Styles for larger screens */
+@media (min-width: 768px) {
+  button {
+    font-size: 2em;
+    padding: 1em 2em;
+  }
+} */

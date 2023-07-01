@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Button example</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, 
+  									maximum-scale=1.0, minimum-scale=1.0">
+	<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles.css') }}"/>
+	<!-- <style>
+		table {
+		  border-collapse: collapse; /* Optional: Combine adjacent borders */
+		}
+		th, td {
+		  border: 1px solid black; /* Apply a solid black border to table headers and cells */
+		  padding: 8px; /* Optional: Add some padding for better visual appearance */
+		}
+	  </style> -->
+
+	<style>
+	.item_type_font {
+		font-family: Arial, sans-serif; /* Change to the desired font family */
+		font-size: 15px;
+	}
+	</style>
+</head>
+<body>
+	<!-- <h1>stats: <span id="stat_result"></span></h1> -->
+    <!-- <button id="get-value-btn">Get value</button> -->
+	<!-- HTML code with a button container element -->
+
+	<div id="button-container"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+		function changeBtnStatus(btn_id, status_type, is_expired) {
+			let button = document.getElementById(btn_id);
+			button.style.backgroundColor = "#D5D5D5";
+			// var type = ["change", "clean", "change", "clean"]
+			// 	var is_expired = [true, true, false, false]
+			let src_tr_id = "0";
+			let dst_tr_id = "2";
+			if (status_type == "change") {
+				dst_tr_id = "2";
+				if (is_expired == true) src_tr_id = "0";
+				else src_tr_id = "2";
+			} else {
+				dst_tr_id = "3";
+				if (is_expired == true) src_tr_id = "1";
+				else src_tr_id = "3";
+			}
+			// Get cell node of the button
+			let src_cell = button.parentNode
+			// append the cell including button
+			let a_cell = document.createElement("td");
+			a_cell.appendChild(button);
+			dst_tr = document.getElementById("row_" + dst_tr_id);
+			dst_tr.appendChild(a_cell);
+
+			console.log("clicked btn: " + btn_id);
+			console.log("target row: " + "row_" + dst_tr_id);
+			
+			// // target table
+			let src_tr = document.getElementById("row_" + src_tr_id);
+			src_tr.removeChild(src_cell)
+
+
+
+		}
+		// Click Event
+		function clickEventHandler(btn_id, item_id, item_name, status_type, is_expired) {
+			var input = window.confirm("청소 또는 교환을 완료 하였습니까? \n" + item_name);
+			if (input) {
+				// This is just showing buttons immediately (doing nothing here)
+				changeBtnStatus(btn_id, status_type, is_expired);
+
+				// Change the status in the Google Sheet
+				$.ajax({
+					type: "POST",
+					url: "/update_item",
+					contentType: "application/json",
+					data: JSON.stringify({"item_id": item_id}),
+					success: function(data) {
+						// alert(data.status);
+						setTimeout(function() {
+							reload_data_func();
+						}, 10000);
+						// location.reload();
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						alert("Error executing function: " + errorThrown);
+					}
+				});
+			} else {
+				// User clicked "Cancel" or closed the prompt
+				// alert("Cancel." + btn_id);
+			}
+		}
+
+		function createButtons(numButtons) {
+			// get a reference to the button container element
+			var container = document.getElementById("button-container");
+
+			// loop through the specified number of times
+			for (let i = 0; i < numButtons; i++) {
+			// create a new button element
+			var button = document.createElement("button");
+
+			// set the text and click event handler for the button
+			button.setAttribute("id", "btn_" + i);
+			button.innerHTML = "Button " + i;
+			// button.addEventListener("click", function() {
+			// 	// alert("Button " + i + " clicked!");
+			// });
+
+			// append the button to the container element
+			container.appendChild(button);
+			}
+		}
+
+		function putBtnsToTable(table_id, btn_begin_id, btn_end_id, type, is_expired) {
+			// get a reference to the button container element
+			var container = document.getElementById("button-container");
+
+			var table = document.createElement("table");
+			table.setAttribute("id", "table_" + table_id);
+			var thead = document.createElement("thead");
+			var th_tr = document.createElement("tr");
+			var th = document.createElement("th");
+			// var type = ["change", "clean", "change", "clean"]
+			// var is_expired = [true, true, false, false]
+			var text_content = "";
+			if (type == "change") {
+				text_content = text_content + "교환";
+			} else {
+				text_content = text_content + "청소";
+			}
+			if (is_expired == true) {
+				text_content = text_content + " (만료)";
+			} else {
+				text_content = text_content + " (만료 전)";
+			}
+
+			// colspan: column span (length of columns to make them to one column)
+			let num_colspan = btn_end_id - btn_begin_id;
+			th.setAttribute("colspan", num_colspan);
+
+			th.textContent = text_content
+			var tbody = document.createElement("tbody");
+			var row = document.createElement("tr");
+			row.setAttribute("id", "row_" + table_id);
+			for (let i = btn_begin_id; i < btn_end_id; i++) {
+    			let cell = document.createElement("td");
+				var button = document.getElementById("btn_" + i);
+				cell.appendChild(button);
+				row.appendChild(cell);
+			}
+			
+			// Table Head
+			th_tr.appendChild(th);
+			thead.appendChild(th_tr);
+			table.appendChild(thead);
+			// Table Body
+			tbody.appendChild(row);
+			table.appendChild(tbody);
+			// Replace the button element with the table element
+			// button.parentNode.replaceChild(table, button);
+			container.appendChild(table);
+		}
+
+		function putValueToBtns(json_data, status_type, is_expired, cur_num_btns) {
+			var bg_color = "#D5D5D5";
+			if (is_expired) {
+				bg_color = "#FF6A6A";
+			}
+			for (let i = 0; i < json_data.length; i++) {
+				let id = json_data[i]["id"];
+				let type = json_data[i]["종류"] ?? " ";
+				let model = json_data[i]["내용"] ?? " ";
+				let button_id = "btn_" + (parseInt(cur_num_btns) + i).toString();
+				let button = document.getElementById(button_id);
+				button.innerHTML = "[" + type + "]" + "<br><p class=item_type_font>" + model + "</p>";
+				button.style.backgroundColor = bg_color;
+				button.style.border = "transparent";
+				button.style.marginRight = "5px";
+				button.style.marginLeft = "5px";
+				button.style.marginTop = "5px";
+				button.style.marginBottom = "5px";
+				button.style.width = "130px";
+				button.style.height = "100px";
+				button.style.fontFamily = "Arial";
+				button.style.fontSize = "12px";
+				button.style.overflow = "ellipsis";
+				// button.style.padding = "10px";
+
+				button.addEventListener("click", function() {
+					// alert("Button " + i + " clicked!");
+					clickEventHandler(button_id, id, type + " " + model, status_type, is_expired);
+				});
+			}
+			cur_num_btns = cur_num_btns + json_data.length;
+			return cur_num_btns;
+		}
+		function reload_data_func() {
+			$.getJSON('/load_google_sheet', function(response) {
+				console.log(response.result);
+				location.reload();
+			});
+		}
+		$(document).ready(function() {
+			setInterval(function() {
+				reload_data_func();
+				location.reload();
+			}, 15000); // 1 day = 86400 seconds -> x 1000 because its unit is ms
+		});
+
+		$(document).ready(function() {
+			$.getJSON('/load_google_sheet', function(response) {
+				console.log(response);
+			});
+			
+			$.getJSON('/get_status_active', function(response) {
+				var change_parts = (JSON.parse(response.change_parts));
+				var clean_parts = (JSON.parse(response.clean_parts));
+				var change_parts_expired = (JSON.parse(response.change_parts_expired));
+				var clean_parts_expired = (JSON.parse(response.clean_parts_expired));
+				var len = change_parts.length + clean_parts.length + 
+						change_parts_expired.length + clean_parts_expired.length;
+
+				createButtons(len)
+				var num_btns = 0;
+				var btn_idxs = [0]
+				var parts_status_list = [change_parts_expired, clean_parts_expired, change_parts, clean_parts]
+				var type = ["change", "clean", "change", "clean"]
+				var is_expired = [true, true, false, false]
+
+				for (let i = 0; i < type.length; i++) {
+					num_btns = putValueToBtns(parts_status_list[i], type[i], is_expired[i], num_btns);	// appliance parts to be replaced (expired)
+					btn_idxs.push(num_btns)
+				}
+				
+				
+				for (let i = 0; i < btn_idxs.length - 1; i++) {
+					console.log(btn_idxs[i], btn_idxs[i + 1]);
+					if (btn_idxs[i + 1] > btn_idxs[i]) {
+						putBtnsToTable(i, btn_idxs[i], btn_idxs[i + 1], type[i], is_expired[i]);
+					}
+				}
+			});
+		});
+
+    </script>
+</body>
+
+</html>
