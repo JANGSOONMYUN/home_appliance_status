@@ -5,15 +5,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, 
   									maximum-scale=1.0, minimum-scale=1.0">
 	<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles.css') }}"/>
-	<!-- <style>
-		table {
-		  border-collapse: collapse; /* Optional: Combine adjacent borders */
-		}
-		th, td {
-		  border: 1px solid black; /* Apply a solid black border to table headers and cells */
-		  padding: 8px; /* Optional: Add some padding for better visual appearance */
-		}
-	  </style> -->
 
 	<style>
 	.item_type_font {
@@ -21,13 +12,22 @@
 		font-size: 15px;
 	}
 	</style>
+	<!-- <link rel="stylesheet" href="../css/home.css"> -->
 </head>
 <body>
-	<!-- <h1>stats: <span id="stat_result"></span></h1> -->
-    <!-- <button id="get-value-btn">Get value</button> -->
 	<!-- HTML code with a button container element -->
-
+	<div id="clock"></div>
+	
 	<div id="button-container"></div>
+
+	<audio id="alarm" src="/static/alarm.wav"></audio>
+	<div id="timer">00:00</div>
+	<button class="timer_button" onclick="startTimer(30)">30초</button>
+	<button class="timer_button" onclick="startTimer(120)">2분</button>
+	<button class="timer_button" onclick="startTimer(180)">3분</button>
+	<button class="timer_button" onclick="startTimer(210)">3분30초</button>
+	<button class="timer_button" onclick="startTimer(240)">4분</button>
+	<button class="timer_button" onclick="startTimer(300)">5분</button>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -163,7 +163,11 @@
 			table.appendChild(tbody);
 			// Replace the button element with the table element
 			// button.parentNode.replaceChild(table, button);
-			container.appendChild(table);
+
+			var div_row = document.createElement("div");
+			div_row.setAttribute("class", "scrollable-container");
+			div_row.appendChild(table);
+			container.appendChild(div_row);
 		}
 
 		function putValueToBtns(json_data, status_type, is_expired, cur_num_btns) {
@@ -209,7 +213,7 @@
 			setInterval(function() {
 				reload_data_func();
 				location.reload();
-			}, 15000); // 1 day = 86400 seconds -> x 1000 because its unit is ms
+			}, 20000000); // 1 day = 86400 seconds -> x 1000 because its unit is ms
 		});
 
 		$(document).ready(function() {
@@ -240,14 +244,61 @@
 				
 				for (let i = 0; i < btn_idxs.length - 1; i++) {
 					console.log(btn_idxs[i], btn_idxs[i + 1]);
-					if (btn_idxs[i + 1] > btn_idxs[i]) {
-						putBtnsToTable(i, btn_idxs[i], btn_idxs[i + 1], type[i], is_expired[i]);
-					}
+					// if (btn_idxs[i + 1] > btn_idxs[i]) {
+					// 	putBtnsToTable(i, btn_idxs[i], btn_idxs[i + 1], type[i], is_expired[i]);
+					// }
+					putBtnsToTable(i, btn_idxs[i], btn_idxs[i + 1], type[i], is_expired[i]);
 				}
 			});
 		});
 
     </script>
+
+	<script>
+		// Display Clock
+		function updateClock() {
+			var now = new Date();
+			var hours = now.getHours();
+			var minutes = now.getMinutes();
+			var seconds = now.getSeconds();
+		
+			// Pad single digit minutes and seconds with leading zeros
+			minutes = minutes < 10 ? '0' + minutes : minutes;
+			seconds = seconds < 10 ? '0' + seconds : seconds;
+		
+			var timeString = hours + ':' + minutes + ':' + seconds;
+			document.getElementById('clock').innerText = timeString;
+		}
+		
+		// Call updateClock every minute
+		setInterval(updateClock, 1000); // Update every second to display seconds correctly
+	</script>
+	<script>
+		// Alarm Timer
+		function startTimer(duration) {
+		  var timer = duration, minutes, seconds;
+		  var interval = setInterval(function () {
+			minutes = parseInt(timer / 60, 10);
+			seconds = parseInt(timer % 60, 10);
+		
+			minutes = minutes < 10 ? "0" + minutes : minutes;
+			seconds = seconds < 10 ? "0" + seconds : seconds;
+		
+			document.getElementById("timer").textContent = minutes + ":" + seconds;
+		
+			if (--timer < 0) {
+			  clearInterval(interval);
+			  document.getElementById("timer").textContent = "00:00";
+			  document.getElementById("alarm").play();
+			  setTimeout(function(){
+				document.getElementById("alarm").pause();
+				document.getElementById("alarm").currentTime = 0;
+			  }, 5000); // Stop alarm after 5 seconds
+			}
+		  }, 1000);
+		}
+	</script>
+		
 </body>
 
 </html>

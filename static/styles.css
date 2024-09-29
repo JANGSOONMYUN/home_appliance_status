@@ -60,4 +60,59 @@ body {
     font-size: 2em;
     padding: 1em 2em;
   }
-} */
+} 
+.container {
+  overflow-x: auto; /* Enable horizontal scrolling */
+} 
+
+.scrollable-container {
+  overflow-x: auto; /* Enable horizontal scrolling for each row */
+  max-width: 100%; /* Allow each row to take up full available width */
+}
+
+.row {
+  overflow-x: auto; /* Enable horizontal scrolling */
+  display: flex; /* Use flexbox to create a row layout */
+  flex-wrap: nowrap; /* Prevent items from wrapping to the next line */
+  margin-bottom: 20px; /* Add margin between rows */
+}
+
+.item {
+  flex: 0 0 auto; /* Allow items to grow and shrink as needed */
+  width: 200px; /* Adjust the width of each item as needed */
+  padding: 10px;
+  margin-right: 10px; /* Add spacing between items */
+  background-color: #f0f0f0;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+  .item {
+    width: 150px; /* Reduce item width for smaller screens */
+  }
+}
+
+/* Time clock */
+#clock {
+  font-size: 48px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Timer */ 
+#timer {
+  font-size: 30px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.timer_button {
+  flex: 0 0 auto; /* Allow items to grow and shrink as needed */
+  width: 150px; /* Adjust the width of each item as needed */
+  padding: 10px;
+  margin-right: 10px; /* Add spacing between items */
+  margin-bottom: 10px;
+  background-color: #f0f0f0;
+}
